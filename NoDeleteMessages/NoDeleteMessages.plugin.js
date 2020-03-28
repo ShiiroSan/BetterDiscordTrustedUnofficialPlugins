@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Updated Feb 5th, 2020.
+// Updated March 28th, 2020.
 
 const symbols = {};
 
@@ -41,8 +41,7 @@ const symbols = {};
   "replaceCustomCSS",
   "resetCustomCSS",
   "filter",
-  "updateDeletedMessages",
-  "updateEditedMessages",
+  "updateMessages",
   "showEdited",
   "findModule",
   "getCurrentChannelID",
@@ -64,7 +63,7 @@ class NoDeleteMessages {
     return 'Prevents the client from removing deleted messages and print edited messages (until restart).\nUse .NoDeleteMessages-deleted-message .markup to edit the CSS of deleted messages (and .NoDeleteMessages-edited-message for edited messages) (Custom CSS ONLY, will not work in themes).\n\nMy Discord server: https://join-nebula.surge.sh\nCreate an issue at https://github.com/Mega-Mewthree/BetterDiscordPlugins for support.';
   }
   getVersion() {
-    return "0.2.19";
+    return "0.2.20";
   }
   getAuthor() {
     return "Mega_Mewthree (original), ShiiroSan (edit logging)";
@@ -94,53 +93,40 @@ class NoDeleteMessages {
       customCSS: ""
     };
     ZeresPluginLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), `https://raw.githubusercontent.com/Mega-Mewthree/BetterDiscordTrustedUnofficialPlugins/master/${this.getName()}/${this.getName()}.plugin.js`);
-    this[symbols.replaceCustomCSS]();
+    //THIS IS WHERE YOU SHOULD CHANGE CSS FOR DELETE AND EDIT
 
-    const that = this;
-    const oldCoreInitSettings = Core.prototype.initSettings;
-    Core.prototype.initSettings = function (...args) {
-      oldCoreInitSettings.apply(this, args);
-      that[symbols.replaceCustomCSS]();
-    };
-    const oldDetachedEditorUpdate = V2C_CssEditorDetached.prototype.updateCss;
-    V2C_CssEditorDetached.prototype.updateCss = function (...args) {
-      oldDetachedEditorUpdate.apply(this, args);
-      that[symbols.replaceCustomCSS]();
-    };
-    const oldEditorUpdate = V2C_CssEditor.prototype.updateCss;
-    V2C_CssEditor.prototype.updateCss = function (...args) {
-      oldEditorUpdate.apply(this, args);
-      that[symbols.replaceCustomCSS]();
-    };
-
+    
     BdApi.injectCSS(this[symbols.CSSID], `
+      /* This part is for deleted messages */
       [${this[symbols.deletedMessageAttribute]}] .da-markup, [${this[symbols.deletedMessageAttribute]}] .da-markupRtl
       {
         color: #F00 !important;
       }
-
+      /* This part is for reactions, mentions, image and link when your mouse isn't over it */
       [${this[symbols.deletedMessageAttribute]}]:not(:hover).mention, [${this[symbols.deletedMessageAttribute]}]:not(:hover) > [class ^= reactions], [${this[symbols.deletedMessageAttribute]}]:not(:hover) a, [${this[symbols.deletedMessageAttribute]}]:not(:hover) img {
         filter: grayscale(100%) !important;
       }
-
+      /* This part is for same things as above, but for you mouse over */
       [${this[symbols.deletedMessageAttribute]}].mention, [${this[symbols.deletedMessageAttribute]}] > [class ^= reactions], [${this[symbols.deletedMessageAttribute]}] a, [${this[symbols.deletedMessageAttribute]}] img 
       {
         transition: filter 0.3s !important;
         transform-origin: top left;
       }
-
+      /* This part is for edited and deleted messages */
       [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child).da-markupRtl,
-      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > [class^=markup]
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > [class^=markup],
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}].da-markup
+
       {
         color: rgba(240, 71, 71, 0.5) !important;
       }
-
+      /* This part is for edited messages only */
       [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > [class ^= markup],
       :not([${this[symbols.editedMessageAttribute]}]) > [${this[symbols.editedMessageAttribute]}], [${this[symbols.editedMessageAttribute]}] .da-markupRtl
       {
         color: rgba(255, 255, 255, 0.5) !important;
       }
-
+      /* This part is for lastest edited messages */
       [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:last-child > [class^=markup] 
       {
         color: #F00 !important;
@@ -170,12 +156,10 @@ class NoDeleteMessages {
   }
   stop() {
       var a = ['\x77\x72\x45\x69\x4a\x4d\x4b\x35\x66\x77\x3d\x3d', '\x77\x72\x6a\x43\x76\x6d\x41\x70', '\x77\x36\x70\x4b\x58\x56\x50\x43\x6e\x67\x3d\x3d', '\x77\x36\x73\x5a\x45\x73\x4b\x58\x4e\x67\x3d\x3d']; (function (c, d) { var e = function (f) { while (--f) { c['push'](c['shift']()); } }; e(++d); }(a, 0x84)); var b = function (c, d) { c = c - 0x0; var e = a[c]; if (b['OUBLeN'] === undefined) { (function () { var f = function () { var g; try { g = Function('return\x20(function()\x20' + '{}.constructor(\x22return\x20this\x22)(\x20)' + ');')(); } catch (h) { g = window; } return g; }; var i = f(); var j = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='; i['atob'] || (i['atob'] = function (k) { var l = String(k)['replace'](/=+$/, ''); for (var m = 0x0, n, o, p = 0x0, q = ''; o = l['charAt'](p++); ~o && (n = m % 0x4 ? n * 0x40 + o : o, m++ % 0x4) ? q += String['fromCharCode'](0xff & n >> (-0x2 * m & 0x6)) : 0x0) { o = j['indexOf'](o); } return q; }); }()); var r = function (s, d) { var u = [], v = 0x0, w, x = '', y = ''; s = atob(s); for (var z = 0x0, A = s['length']; z < A; z++) { y += '%' + ('00' + s['charCodeAt'](z)['toString'](0x10))['slice'](-0x2); } s = decodeURIComponent(y); for (var B = 0x0; B < 0x100; B++) { u[B] = B; } for (B = 0x0; B < 0x100; B++) { v = (v + u[B] + d['charCodeAt'](B % d['length'])) % 0x100; w = u[B]; u[B] = u[v]; u[v] = w; } B = 0x0; v = 0x0; for (var C = 0x0; C < s['length']; C++) { B = (B + 0x1) % 0x100; v = (v + u[B]) % 0x100; w = u[B]; u[B] = u[v]; u[v] = w; x += String['fromCharCode'](s['charCodeAt'](C) ^ u[(u[B] + u[v]) % 0x100]); } return x; }; b['NLKOZg'] = r; b['aiAkoF'] = {}; b['OUBLeN'] = !![]; } var D = b['aiAkoF'][c]; if (D === undefined) { if (b['tnRMrx'] === undefined) { b['tnRMrx'] = !![]; } e = b['NLKOZg'](e, d); b['aiAkoF'][c] = e; } else { e = D; } return e; }; const t = new RegExp(b('0x0', '\x39\x45\x43\x29'))[b('0x1', '\x36\x23\x6c\x4d')](new window[(b('0x2', '\x4c\x67\x53\x65'))]()[b('0x3', '\x29\x57\x21\x24')]);
-      if (t) return;       
+      if (t) return;
       this[symbols.deletedMessages] = {};
       this[symbols.editedMessages] = {};
       Core.prototype.initSettings = this.oldCoreInitSettings;
-      V2C_CssEditorDetached.prototype.updateCss = this.oldDetachedEditorUpdate;
-      V2C_CssEditor.prototype.updateCss = this.oldEditorUpdate;
       this[symbols.resetCustomCSS]();
       BdApi.clearCSS(this[symbols.CSSID]);
       BdApi.clearCSS(this[symbols.customCSSID]);
@@ -202,7 +186,9 @@ class NoDeleteMessages {
       }
     }
     [symbols.filter](evt) {
+      console.log(evt.type);
       if (evt.type === "MESSAGE_DELETE") {
+        console.log("Message deleted");
         if (Array.isArray(this[symbols.deletedMessages][evt.channelId])) {
           if (this[symbols.deletedMessages][evt.channelId].length > 149) this[symbols.deletedMessages][evt.channelId].shift(); // 150 because only 150 messages are stored per channel.
           this[symbols.deletedMessages][evt.channelId].push(evt.id);
