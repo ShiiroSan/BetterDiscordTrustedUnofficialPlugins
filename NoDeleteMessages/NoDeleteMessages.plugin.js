@@ -186,9 +186,7 @@ class NoDeleteMessages {
       }
     }
     [symbols.filter](evt) {
-      console.log(evt.type);
       if (evt.type === "MESSAGE_DELETE") {
-        console.log("Message deleted");
         if (Array.isArray(this[symbols.deletedMessages][evt.channelId])) {
           if (this[symbols.deletedMessages][evt.channelId].length > 149) this[symbols.deletedMessages][evt.channelId].shift(); // 150 because only 150 messages are stored per channel.
           this[symbols.deletedMessages][evt.channelId].push(evt.id);
