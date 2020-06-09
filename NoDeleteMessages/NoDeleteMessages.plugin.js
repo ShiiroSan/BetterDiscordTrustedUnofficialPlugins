@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Updated March 28th, 2020.
+// Updated June 6th, 2020.
 
 const symbols = {};
 
@@ -63,7 +63,7 @@ class NoDeleteMessages {
     return 'Prevents the client from removing deleted messages and print edited messages (until restart).\nUse .NoDeleteMessages-deleted-message .markup to edit the CSS of deleted messages (and .NoDeleteMessages-edited-message for edited messages) (Custom CSS ONLY, will not work in themes).\n\nMy Discord server: https://join-nebula.surge.sh\nCreate an issue at https://github.com/Mega-Mewthree/BetterDiscordPlugins for support.';
   }
   getVersion() {
-    return "0.2.20-PCCompatibleEdition";
+    return "0.2.21-PCCompatibleEdition";
   }
   getAuthor() {
     return "Mega_Mewthree (original), ShiiroSan (edit logging)";
@@ -77,7 +77,7 @@ class NoDeleteMessages {
     this[symbols.editedMessageAttribute] = `data-${this[symbols.generateRandomString](32)}`;
     this[symbols.settings] = {};
 
-    this.messageClassName = this[symbols.findModule]("message")["message"].split(" ")[0];
+    this.messageClassName = this[symbols.findModule](["message", "buttons"])["message"].split(" ")[0];
     this.markupClassName = this[symbols.findModule]("markup")["markup"].split(" ")[0];
     this.chatContentClassName = this[symbols.findModule]("chatContent")["chatContent"].split(" ")[0];
     this.messagesWrapperClassName = this[symbols.findModule]("messagesWrapper")["messagesWrapper"].split(" ")[0];
@@ -160,7 +160,7 @@ class NoDeleteMessages {
   stop() {
       this[symbols.deletedMessages] = {};
       this[symbols.editedMessages] = {};
-      Core.prototype.initSettings = this.oldCoreInitSettings;
+      //Core.prototype.initSettings = this.oldCoreInitSettings;
       this[symbols.resetCustomCSS]();
       BdApi.clearCSS(this[symbols.CSSID]);
       BdApi.clearCSS(this[symbols.customCSSID]);
@@ -246,7 +246,7 @@ class NoDeleteMessages {
       let change;
       while (len--) {
         change = addedNodes[len];
-        if (change.classList && (change.classList.contains(this.chatContentClassName) || change.classList.contains(this.messagesWrapperClassName) || change.classList.contains(this.chatClassName)) || change.firstChild && change.firstChild.classList && change.firstChild.classList.contains(this.messageClassName)) {
+        if (change.classList && (change.classList.contains(this.chatContentClassName) || change.classList.contains(this.messagesWrapperClassName) || change.classList.contains(this.chatClassName)) || change.firstChild && change.firstChild.classList && change.firstChild.classList.contains(this.Content)) {
           this[symbols.updateMessages]();
           break;
         }
