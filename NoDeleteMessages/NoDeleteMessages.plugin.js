@@ -26,7 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
 // Updated July 1st, 2020.
+
 
 const symbols = {};
 
@@ -76,6 +78,12 @@ class NoDeleteMessages {
     this[symbols.deletedMessageAttribute] = `data-${this[symbols.generateRandomString](33)}`;
     this[symbols.editedMessageAttribute] = `data-${this[symbols.generateRandomString](32)}`;
     this[symbols.settings] = {};
+
+    this.messageClassName = this[symbols.findModule](["message", "buttons"])["message"].split(" ")[0];
+    this.markupClassName = this[symbols.findModule]("markup")["markup"].split(" ")[0];
+    this.chatContentClassName = this[symbols.findModule]("chatContent")["chatContent"].split(" ")[0];
+    this.messagesWrapperClassName = this[symbols.findModule]("messagesWrapper")["messagesWrapper"].split(" ")[0];
+    this.chatClassName = this[symbols.findModule]("chat")["chat"].split(" ")[0];
   }
   load() {}
   unload() {}
@@ -92,11 +100,10 @@ class NoDeleteMessages {
     };
     ZeresPluginLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), `https://raw.githubusercontent.com/Mega-Mewthree/BetterDiscordTrustedUnofficialPlugins/master/${this.getName()}/${this.getName()}.plugin.js`);
     //THIS IS WHERE YOU SHOULD CHANGE CSS FOR DELETE AND EDIT
-
     
     BdApi.injectCSS(this[symbols.CSSID], `
       /* This part is for deleted messages */
-      [${this[symbols.deletedMessageAttribute]}] .da-markup, [${this[symbols.deletedMessageAttribute]}] .da-markupRtl
+      [${this[symbols.deletedMessageAttribute]}] .${this.markupClassName}
       {
         color: #F00 !important;
       }
@@ -111,21 +118,21 @@ class NoDeleteMessages {
         transform-origin: top left;
       }
       /* This part is for edited and deleted messages */
-      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child).da-markupRtl,
-      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > [class^=markup],
-      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}].da-markup
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child).${this.markupClassName},
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > .${this.markupClassName},
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}].${this.markupClassName}
 
       {
         color: rgba(240, 71, 71, 0.5) !important;
       }
       /* This part is for edited messages only */
-      [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > [class ^= markup],
-      :not([${this[symbols.editedMessageAttribute]}]) > [${this[symbols.editedMessageAttribute]}], [${this[symbols.editedMessageAttribute]}] .da-markupRtl
+      [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:not(:last-child) > .${this.markupClassName},
+      :not([${this[symbols.editedMessageAttribute]}]) > [${this[symbols.editedMessageAttribute]}]
       {
         color: rgba(255, 255, 255, 0.5) !important;
       }
       /* This part is for lastest edited messages */
-      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:last-child > [class^=markup] 
+      [${this[symbols.deletedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}] > [${this[symbols.editedMessageAttribute]}]:last-child > .${this.markupClassName}
       {
         color: #F00 !important;
       }
@@ -155,7 +162,7 @@ class NoDeleteMessages {
   stop() {
       this[symbols.deletedMessages] = {};
       this[symbols.editedMessages] = {};
-      Core.prototype.initSettings = this.oldCoreInitSettings;
+      //Core.prototype.initSettings = this.oldCoreInitSettings;
       this[symbols.resetCustomCSS]();
       BdApi.clearCSS(this[symbols.CSSID]);
       BdApi.clearCSS(this[symbols.customCSSID]);
@@ -241,7 +248,7 @@ class NoDeleteMessages {
       let change;
       while (len--) {
         change = addedNodes[len];
-        if (change.classList && (change.classList.contains("da-chatContent") || change.classList.contains("da-messagesWrapper") || change.classList.contains("da-chat")) || change.firstChild && change.firstChild.classList && change.firstChild.classList.contains("da-message")) {
+        if (change.classList && (change.classList.contains(this.chatContentClassName) || change.classList.contains(this.messagesWrapperClassName) || change.classList.contains(this.chatClassName)) || change.firstChild && change.firstChild.classList && change.firstChild.classList.contains(this.Content)) {
           this[symbols.updateMessages]();
           break;
         }
@@ -251,7 +258,9 @@ class NoDeleteMessages {
       const channelDeletedMessages = this[symbols.deletedMessages][this[symbols.getCurrentChannelID]()];
       const channelEditedMessages = this[symbols.editedMessages][this[symbols.getCurrentChannelID]()];
       if (!channelEditedMessages && !channelDeletedMessages) return;
-      $(".da-message").each((index, elem) => {
+      let elems = document.getElementsByClassName(this.messageClassName);
+      for (let index = 0; index < elems.length; index++) {
+        const elem = elems[index];
         try {
           const messageID = ZeresPluginLibrary.ReactTools.getOwnerInstance(elem.querySelector(".container-1ov-mD")).props.message.id;
           if (channelDeletedMessages) {
@@ -263,10 +272,9 @@ class NoDeleteMessages {
             }
           }
           if (channelEditedMessages) {
-            const markupClassName = this[symbols.findModule]("markup")["markup"].split(" ")[0];
-            const markup = elem.querySelector("." + markupClassName);
-            while (markup.getElementsByClassName(markupClassName).length)
-              markup.getElementsByClassName(markupClassName)[0].remove();
+            const markup = elem.querySelector("." + this.markupClassName);
+            while (markup.getElementsByClassName(this.markupClassName).length)
+              markup.getElementsByClassName(this.markupClassName)[0].remove();
             if (channelEditedMessages[messageID]) {
               markup.setAttribute(this[symbols.editedMessageAttribute], "");
               const edited = this[symbols.editedMessages][this[symbols.getCurrentChannelID]()][messageID];
@@ -296,7 +304,7 @@ class NoDeleteMessages {
             }
           }
         } catch (e) {}
-      });
+      }
     }
 
   [symbols.showEdited](content) {
